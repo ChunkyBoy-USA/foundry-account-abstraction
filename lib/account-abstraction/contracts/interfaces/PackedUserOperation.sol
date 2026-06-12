@@ -16,10 +16,10 @@ pragma solidity >=0.7.5;
  * @param signature             - Sender-verified signature over the entire request, the EntryPoint address and the chain ID.
  */
 struct PackedUserOperation {
-    address sender;
-    uint256 nonce;
-    bytes initCode;
-    bytes callData;
+    address sender;     // our minimal account
+    uint256 nonce;      // nonce 
+    bytes initCode;     // ignore
+    bytes callData;     // this is where we put "the good stuff"
     bytes32 accountGasLimits;
     uint256 preVerificationGas;
     bytes32 gasFees;
