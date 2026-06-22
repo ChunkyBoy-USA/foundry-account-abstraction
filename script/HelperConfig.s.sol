@@ -1,8 +1,9 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.24;
 
-import { Script } from "lib/forge-std/src/Script.sol";
+import { Script, console } from "lib/forge-std/src/Script.sol";
 import { MinimalAccount } from "src/ethereum/MinimalAccount.sol";
+import { EntryPoint } from "lib/account-abstraction/contracts/core/EntryPoint.sol";
 
 contract HelperConfig is Script {
     error HelperConfig__InvalidChainId();
@@ -25,11 +26,11 @@ contract HelperConfig is Script {
         networkConfigs[ETH_SEPOLIA_CHIAN_ID] = getEthSepoliaConfig();
     }
 
-    function getConfig() public view returns(NetworkConfig memory) {
+    function getConfig() public returns(NetworkConfig memory) {
         return getConfigByChainId(block.chainid);
     }
 
-    function getConfigByChainId(uint256 chainId) public view returns(NetworkConfig memory) {
+    function getConfigByChainId(uint256 chainId) public returns(NetworkConfig memory) {
         if (chainId == LOCAL_CHIAN_ID) {
             return getOrCreateAnvilEthConfig();
         } else if(networkConfigs[chainId].entryPoint != address(0)) {
@@ -47,12 +48,20 @@ contract HelperConfig is Script {
         return NetworkConfig({entryPoint: address(0), account: BURNER_WALLET});
     }
 
-    function getOrCreateAnvilEthConfig() public view returns (NetworkConfig memory) {
+    function getOrCreateAnvilEthConfig() public returns (NetworkConfig memory) {
         if (localNetworkConfig.account != address(0)) {
             return localNetworkConfig;
         }
 
+        
+
         // deploy a mock entry point contract
-        return NetworkConfig({ entryPoint: address(0), account: FOUNDRY_DEFAULT_WALLET });
+        console.log("Deploying mocks...");
+        vm.startBroadcast(FOUNDRY_DEFAULT_WALLET);
+        EntryPoint entryPoint = new EntryPoint();
+        vm.stopBroadcast();
+
+
+        return NetworkConfig({ entryPoint: address(entryPoint), account: FOUNDRY_DEFAULT_WALLET });
     }
 }
